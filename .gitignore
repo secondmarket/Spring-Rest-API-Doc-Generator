@@ -1,0 +1,44 @@
+logs
+project/project
+project/target
+target
+tmp
+.history
+dist
+
+#Compiled things#
+*.class
+
+#Database Things#
+*.db
+
+#OS Generated#
+.DS_Store
+.DS_Store?
+.Spotlight-V100
+Thumbs.db
+
+#Package Files#
+*.jar
+*.war
+
+#IntelliJ Files#
+*.iml
+*.ipr
+*.iws
+.idea/
+
+#Eclipse Files#
+.project
+.metadata
+bin/**
+tmp/**
+tmp/**/*
+*.tmp
+*.bak
+*.swp
+local.properties
+.classpath
+.settings/
+.loadpath
+
