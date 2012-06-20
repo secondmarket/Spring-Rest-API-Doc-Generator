@@ -1,5 +1,6 @@
 package com.secondmarket.xmlgen;
 
+import com.secondmarket.annotatedobject.amethod.AnnotatedMethod;
 import org.dom4j.Document;
 import org.dom4j.DocumentFactory;
 import org.dom4j.Element;
@@ -28,6 +29,7 @@ public class SummaryGenerator {
         d = df.createDocument();
         root = df.createElement("folders");
         d.setRootElement(root);
+        root.addAttribute("rootPath", "http://secondmarket.com/");
 
         mainFolder = new File(location);
         traverseFolder(mainFolder, root, "");
@@ -37,7 +39,7 @@ public class SummaryGenerator {
         Element folderElement = df.createElement("folder");
         folderElement.addAttribute("name", folder.getName());
         File[] children = folder.listFiles();
-        String totalPath = path + "/" + folder.getName();
+        String totalPath = AnnotatedMethod.pathMash(path,folder.getName());
         if (children != null) {
             for (File f : children) {
                 if (f.isDirectory()) {
@@ -55,7 +57,7 @@ public class SummaryGenerator {
             //File element
             Element fileElement = df.createElement("file");
             fileElement.addText(file.getName());
-            String totalPath = path + "/" + file.getName();
+            String totalPath = AnnotatedMethod.pathMash(path, file.getName());
             fileElement.addAttribute("path", totalPath);
             parent.add(fileElement);
         }

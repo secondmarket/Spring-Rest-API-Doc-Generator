@@ -57,6 +57,12 @@ public class MainMojo extends AbstractMojo {
      */
     private MavenProject project;
 
+    /**
+     * @parameter
+     * @required
+     */
+    private Object rootURL;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         getLog().info("Hello World, from the Plugin!");
@@ -73,7 +79,7 @@ public class MainMojo extends AbstractMojo {
         for (Class c : controllers) {
             getLog().info(c.getName());
         }
-        XMLGenerator.generateXML(controllers, docDestination.toString());
+        XMLGenerator.generateXML(controllers, rootURL.toString(), docDestination.toString());
         SummaryGenerator sg = new SummaryGenerator(docDestination.toString());
         try {
             sg.writeDocument("summary.xml");
@@ -89,11 +95,12 @@ public class MainMojo extends AbstractMojo {
      * @throws MalformedURLException
      */
     private void getClasses() throws DependencyResolutionRequiredException, DuplicateRealmException, MalformedURLException {
-        List<String> elements = project.getTestClasspathElements();
+        List<String> elements = project.getRuntimeClasspathElements();
         ClassWorld world = new ClassWorld();
         ClassRealm realm;
         realm = world.newRealm("maven.plugin." + getClass().getSimpleName(), Thread.currentThread().getContextClassLoader());
         for (String e : elements) {
+            getLog().info(e);
             File elementFile = new File(e);
             URL url = new URL("file:///" + elementFile.getPath() + (elementFile.isDirectory() ? "/" : ""));
             realm.addConstituent(url);

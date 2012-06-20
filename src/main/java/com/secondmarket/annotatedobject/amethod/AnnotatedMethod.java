@@ -44,7 +44,7 @@ public class AnnotatedMethod {
         for (Annotation ann: mapping){
             if(ann instanceof RequestMapping){
                 RequestMapping rm =  (RequestMapping) ann;
-                String[] listPath=  rm.value();
+                String[] listPath = rm.value();
 
                 for(String reqPath: listPath){
                     this.path+= reqPath;
@@ -118,19 +118,6 @@ public class AnnotatedMethod {
         return reqParam;
     }
 
-    public String toString(){
-        String result ="";
-        result = "Method name: " + this.method.getName() + ", Return value: " + this.returnType
-                + ", Annotation Path: " + this.path + ", Annotation method: " + this.requestMethod +  ", Parameter: ";
-
-        for(AnnotatedParam ap: this.listOfParams){
-            result+= ap.printParam() + " ";
-
-        }
-
-        return result;
-    }
-
     public ArrayList<AnnotatedParam> getAllParams(){
         return this.listOfParams;
     }
@@ -155,15 +142,12 @@ public class AnnotatedMethod {
         Element method = DocumentHelper.createElement("method");
         Element name = method.addElement("name");
         name.addText(this.method.getName());
-        if(!this.getPath().isEmpty()){
+            //Maybe check for empty?
             Element mapping = method.addElement("mapping");
-            mapping.addText(this.parentURL + "/" + this.getPath());
-        }
-        if(!this.getPath().isEmpty()){
+            mapping.addText(pathMash(this.parentURL, this.getPath()));
+            //Maybe check for empty?
             Element action = method.addElement("action");
             action.addText(this.requestMethod);
-        }
-
         if(!this.listOfParams.isEmpty()) {
             Element parameter = method.addElement("parameters");
 
@@ -178,4 +162,18 @@ public class AnnotatedMethod {
         return method;
     }
 
+    public Element toXML(String root) {
+        this.parentURL = pathMash(root, parentURL);
+        return toXML();
+    }
+
+    public static String pathMash(String first, String second) {
+        if (first.endsWith("/") && second.startsWith("/")) {
+            return first + second.substring(1);
+        } else if (first.endsWith("/") || second.startsWith("/")) {
+            return first + second;
+        } else {
+            return first + "/" + second;
+        }
+    }
 }

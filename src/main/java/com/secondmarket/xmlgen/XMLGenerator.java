@@ -16,13 +16,13 @@ import java.util.Set;
  */
 public class XMLGenerator {
 
-    public static void generateXML(Set<Class<?>> controllers, String destination) {
+    public static void generateXML(Set<Class<?>> controllers, String rootURL, String destination) {
         try {
             for (Class c : controllers) {
                 Document document = DocumentFactory.getInstance().createDocument();
                 AnnotatedClass ac = new AnnotatedClass(c);
                 ac.toXML(document);
-                ac.saveToXML(destination);
+                ac.saveToXML(rootURL, destination);
             }
         } catch (IOException e) {
             e.printStackTrace();

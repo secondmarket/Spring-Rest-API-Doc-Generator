@@ -155,7 +155,7 @@ public class AnnotatedClass {
         return root;
     }
 
-    public void saveToXML(String location) throws IOException {
+    public void saveToXML(String rootURL, String location) throws IOException {
         String path = this.getPath();
         //Delete existing
         File dir = new File(location);
@@ -163,17 +163,19 @@ public class AnnotatedClass {
             dir.delete();
         }
         //Make it a local directory
-        path = location + path;
+        String pathWithRoot = AnnotatedMethod.pathMash(rootURL, path);
+        path = AnnotatedMethod.pathMash(location, pathWithRoot);
         for (AnnotatedMethod am : listOfMethods) {
             //Right now, not using cleaned path
-            //TODO Evaluate this strategy
             String methodPath = am.getPath();
             String requestMethod = am.getRequestMethod();
-            Element methodXML = am.toXML();
+            //add the root to the method before making XML
+            Element methodXML = am.toXML(rootURL);
             Document methodDoc = DocumentFactory.getInstance().createDocument();
             methodDoc.setRootElement(methodXML);
             //save
-            String totalPath = path + "/" + methodPath + "/" + requestMethod + ".xml";
+            String folderPath = AnnotatedMethod.pathMash(path, methodPath);
+            String totalPath = AnnotatedMethod.pathMash(folderPath, requestMethod + ".xml");
             //Make directory structure
             File f = new File(totalPath);
             if (!f.exists()) {
