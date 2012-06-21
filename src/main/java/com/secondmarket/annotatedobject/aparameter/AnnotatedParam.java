@@ -10,9 +10,7 @@ import org.dom4j.Element;
  * To change this template use File | Settings | File Templates.
  */
 public interface AnnotatedParam {
-    //public toXml();
     public String getValue();
     public String getType();
-    public String printParam();
     public Element toXML();
 }

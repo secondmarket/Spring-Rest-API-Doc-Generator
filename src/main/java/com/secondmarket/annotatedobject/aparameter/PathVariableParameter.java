@@ -25,6 +25,26 @@ public class PathVariableParameter implements AnnotatedParam {
 
     }
 
+    public Element toXML() {
+        Element param = DocumentHelper.createElement("parameter");
+        Element name = param.addElement("name");
+        name.addText(this.getType());
+        Element mapped = param.addElement("mapped");
+        mapped.addText("True");
+        Element mappingInfo = param.addElement("mappinginfo");
+        Element mappingType = mappingInfo.addElement("mappingtype");
+        mappingType.addText("Parameter should be bound to a URI template " + "[" + this.getAnnotationName() + "]");
+        if(!this.getPathVariable().value().isEmpty()){
+            Element value = mappingInfo.addElement("value");
+            value.addText(this.getPathVariable().value());
+        }
+        return param;
+    }
+
+    //==========================================================================
+    //===========================GETTERS========================================
+    //==========================================================================
+
     public PathVariable getPathVariable() {
         return param;
     }
@@ -41,25 +61,4 @@ public class PathVariableParameter implements AnnotatedParam {
         return this.paramName;
     }
 
-    public String printParam() {
-        String result="";
-        result = "Annotation type: " + this.paramName +  ", parameter value: " + this.param.value() + ", Param type: " + this.paramType.getName();
-        return result;
-    }
-
-    public Element toXML() {
-        Element param = DocumentHelper.createElement("parameter");
-        Element name = param.addElement("name");
-        name.addText(this.getType());
-        Element mapped = param.addElement("mapped");
-        mapped.addText("True");
-        Element mappingInfo = param.addElement("mappinginfo");
-        Element mappingType = mappingInfo.addElement("mappingtype");
-        mappingType.addText("Parameter should be bound to a URI template " + "[" + this.getAnnotationName() + "]");
-        if(!this.getPathVariable().value().isEmpty()){
-            Element value = mappingInfo.addElement("value");
-            value.addText(this.getPathVariable().value());
-        }
-        return param;
-    }
 }

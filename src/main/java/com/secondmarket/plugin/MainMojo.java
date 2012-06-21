@@ -1,5 +1,7 @@
 package com.secondmarket.plugin;
 
+import com.secondmarket.annotatedobject.amethod.AnnotatedMethod;
+import com.secondmarket.jsongen.JSONGenerator;
 import com.secondmarket.xmlgen.SummaryGenerator;
 import com.secondmarket.xmlgen.XMLGenerator;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
@@ -74,18 +76,31 @@ public class MainMojo extends AbstractMojo {
         } catch (Exception e) {
             getLog().error(e);
         }
+        writeXML();
+        writeSummary();
+        writeJSON();
+    }
+
+    private void writeXML() {
         Reflections reflections = new Reflections(packageName.toString());
         Set<Class<?>> controllers = reflections.getTypesAnnotatedWith(Controller.class);
-        for (Class c : controllers) {
-            getLog().info(c.getName());
-        }
-        XMLGenerator.generateXML(controllers, rootURL.toString(), docDestination.toString());
-        SummaryGenerator sg = new SummaryGenerator(docDestination.toString());
+        String XMLPath = AnnotatedMethod.pathMash(docDestination.toString(), "/xml");
+        XMLGenerator.generateXML(controllers, rootURL.toString(), XMLPath);
+    }
+
+    private void writeSummary() {
+        String XMLPath = AnnotatedMethod.pathMash(docDestination.toString(), "/xml");
+        SummaryGenerator sg = new SummaryGenerator(XMLPath);
         try {
             sg.writeDocument("summary.xml");
         } catch (IOException e) {
             getLog().error(e);
         }
+    }
+
+    private void writeJSON() {
+        String JSONPath = AnnotatedMethod.pathMash(docDestination.toString(), "/json");
+        JSONGenerator.generateJSON(JSONPath);
     }
 
     /**
@@ -100,7 +115,6 @@ public class MainMojo extends AbstractMojo {
         ClassRealm realm;
         realm = world.newRealm("maven.plugin." + getClass().getSimpleName(), Thread.currentThread().getContextClassLoader());
         for (String e : elements) {
-            getLog().info(e);
             File elementFile = new File(e);
             URL url = new URL("file:///" + elementFile.getPath() + (elementFile.isDirectory() ? "/" : ""));
             realm.addConstituent(url);

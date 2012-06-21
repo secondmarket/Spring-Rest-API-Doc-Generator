@@ -16,20 +16,14 @@ import org.dom4j.Element;
 import org.dom4j.Document;
 
 /**
- * Created with IntelliJ IDEA.
- * User: rdavid
- * Date: 6/7/12
- * Time: 4:19 PM
- * To change this template use File | Settings | File Templates.
+ * Represents a class to be reflected and described
  */
 public class AnnotatedClass {
 
-    //Fields
     private ArrayList<AnnotatedMethod> listOfMethods = new ArrayList<AnnotatedMethod>();
     private String className;
     private Class clazz;
     private Annotation[] classAnnotations;
-    private String classMapping="";
     private String path="";
     private String methodName="";
     private String action="";
@@ -39,111 +33,43 @@ public class AnnotatedClass {
         this.clazz = clazz;
         this.className = clazz.getName();
         this.classAnnotations =  clazz.getAnnotations();
-        this.printAndExecuteClassInfo();
+        this.initialize();
         Method[] methods = clazz.getMethods();
         for(Method method: methods){
             if(method.isAnnotationPresent(RequestMapping.class)){
                 this.listOfMethods.add(new AnnotatedMethod(method, this.path));
             }
         }
-
-        printAndExecuteClassInfo();
     }
 
-    public String getPath(){
-        return this.path;
-    }
 
-    public String getMethodName(){
-        return this.methodName;
-    }
 
-    public String getClassMapping(){
-        return this.classMapping;
-    }
-
-    public ArrayList<AnnotatedMethod> getAnnotatedMethods(){
-        return this.listOfMethods;
-    }
-
-    public String getClassName(){
-        return this.className;
-    }
-
-    public String getAction(){
-        return this.action;
-    }
-
-    public void printAndExecuteClassInfo(){
-        //System.out.println("Class Name: " + this.className);
-
+    public void initialize(){
         for(Annotation ca: classAnnotations){
             if(ca.annotationType().getCanonicalName().contains("RequestMapping")){
-                classMapping+= "Class annotation: " + ca.annotationType();
-
-                //System.out.println(ca.annotationType());
                 RequestMapping rm = (RequestMapping) ca;
-
-
                 RequestMethod[] reqMethod = rm.method();
-                int countClassMethods = 1;
-                classMapping+=", RequestMapping Methods: ";
-
-                //System.out.println("RequestMapping Methods: ");
                 for(RequestMethod rMet: reqMethod){
                     this.methodName = rMet.name();
-                    classMapping+= ", Method #"+countClassMethods +": "+  rMet.name();
-                    //System.out.println("Method #"+countClassMethods +": "+  rMet.name());
-                    countClassMethods++;
                 }
-
-                String[] classHeaders = rm.headers();
-                String header="";
-                for(String h: classHeaders){
-                    header+=h;
-                }
-
-                classMapping+=", RequestMapping Header: " + header;
-                //System.out.println("RequestMapping Header: " + header);
-
                 String[] classValue = rm.value();
-                String value="";
-                for(String v: classValue){
-                    value+=v;
-                }
                 if (classValue.length > 0) {
                     this.path = classValue[0];
                 }
-                classMapping+= "RequestMapping Class Path: " + value;
-                ////System.out.println("RequestMapping Class Path: " + value);
-
             }
-        }
-
-        //System.out.println("class Methods: ");
-        for(AnnotatedMethod am: this.listOfMethods){
-
-            //System.out.println(am.toString());
-            //System.out.println();
         }
     }
 
     public Element toXML(Document doc){
-
         Element root = doc.addElement("annotatedclass");
         Element clazz = root.addElement("name");
         clazz.addText(this.getClassName());
-
-        if(!this.getPath().isEmpty()){
-            Element mapping = root.addElement("mapping");
-            mapping.addText(this.getPath());
-        }
-
+        Element mapping = root.addElement("mapping");
+        mapping.addText(this.getPath());
         if(!this.getAction().isEmpty()){
             Element action = root.addElement("action");
             action.addText(this.getAction());
         }
-
         if(!this.listOfMethods.isEmpty()){
             Element methods = root.addElement("methods");
 
@@ -191,6 +117,31 @@ public class AnnotatedClass {
             writer.flush();
             fos.close();
         }
+    }
+
+
+    //==========================================================================
+    //===========================GETTERS========================================
+    //==========================================================================
+
+    public String getPath(){
+        return this.path;
+    }
+
+    public String getMethodName(){
+        return this.methodName;
+    }
+
+    public ArrayList<AnnotatedMethod> getAnnotatedMethods(){
+        return this.listOfMethods;
+    }
+
+    public String getClassName(){
+        return this.className;
+    }
+
+    public String getAction(){
+        return this.action;
     }
 
 }

@@ -24,28 +24,6 @@ public class RequestParameter implements AnnotatedParam {
         this.paramType = param;
     }
 
-    public String getValue() {
-        return this.requestParam.value();
-    }
-
-    public String getType() {
-        return this.paramType.getName();
-    }
-
-    public RequestParam getRequestParam(){
-        return this.requestParam;
-    }
-    public String printParam() {
-        String result="";
-        result = "Annotation type: " +  this.paramName + ", parameter value: " + this.requestParam.value() + ", parameter Default: " + this.requestParam.defaultValue() + ", parameter type: " + this.paramType.getName();
-        return result;
-    }
-
-    public String getAnnotationName(){
-        return this.paramName;
-    }
-
-
     public Element toXML() {
         Element param = DocumentHelper.createElement("parameter");
         Element name = param.addElement("name");
@@ -73,6 +51,26 @@ public class RequestParameter implements AnnotatedParam {
             defaultValue.addText(this.getRequestParam().defaultValue());
         }
         return param;
+    }
+
+    //==========================================================================
+    //===========================GETTERS========================================
+    //==========================================================================
+
+    public String getValue() {
+        return this.requestParam.value();
+    }
+
+    public String getType() {
+        return this.paramType.getName();
+    }
+
+    public RequestParam getRequestParam(){
+        return this.requestParam;
+    }
+
+    public String getAnnotationName(){
+        return this.paramName;
     }
 
 }

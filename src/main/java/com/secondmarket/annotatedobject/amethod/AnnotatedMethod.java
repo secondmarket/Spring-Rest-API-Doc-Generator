@@ -1,6 +1,8 @@
 package com.secondmarket.annotatedobject.amethod;
 
 import com.secondmarket.annotatedobject.aparameter.*;
+import com.secondmarket.jsongen.JSONGenerator;
+import com.secondmarket.xmlgen.XMLGenerator;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +20,6 @@ import java.util.ArrayList;
  */
 public class AnnotatedMethod {
 
-    //Fields
     private Method method;
     private Class returnType;
     private String requestMethod="";
@@ -26,73 +27,106 @@ public class AnnotatedMethod {
     private String parentURL;
     private ArrayList<AnnotatedParam> listOfParams = new ArrayList<AnnotatedParam>();
 
-    //Pattern to represent /{.....}/
-    private static String paramPattern = "/\\{[^/]*\\}/";
-
     public AnnotatedMethod(Method method, String parentURL){
         this.method = method;
         this.parentURL = parentURL;
         this.returnType = method.getReturnType();
+        JSONGenerator.addClass(this.returnType);
         init();
     }
 
-    public void init(){
+    public void init() {
+        initPathandMethod();
+        initParameters();
+    }
 
-        //Mapping for the method parameters.
+    /**
+     * Check for @RequestMapping annotation and, if present, extract path and method
+     * information
+     */
+    private void initPathandMethod() {
         Annotation[] mapping =  method.getDeclaredAnnotations();
-
-        for (Annotation ann: mapping){
-            if(ann instanceof RequestMapping){
-                RequestMapping rm =  (RequestMapping) ann;
-                String[] listPath = rm.value();
-
-                for(String reqPath: listPath){
-                    this.path+= reqPath;
-                }
-
-                RequestMethod[] listRequestMethod = ((RequestMapping) ann).method();
-
-                for(RequestMethod rMet: listRequestMethod){
-                    this.requestMethod+= rMet;
-
-                }
+        RequestMapping requestMapping = method.getAnnotation(RequestMapping.class);
+        if (requestMapping != null) {
+            String[] listPath = requestMapping.value();
+            if (listPath.length > 0) {
+                this.path = listPath[0];
+            }
+            RequestMethod[] listRequestMethod = requestMapping.method();
+            if(listRequestMethod.length > 0) {
+                this.requestMethod = listRequestMethod[0].toString();
             }
         }
+    }
 
-        Class[] regularParams = method.getParameterTypes();
-        int countParams = 0;
-
-        Annotation[][] paramClass = method.getParameterAnnotations();
-
-        //Send the Method's parameters to the appropriate param class.
-        for(int i = 0; i < paramClass.length; i++){
-            Annotation[] annotations = paramClass[i];
-
+    /**
+     * Analyze and cast all parameters of the method, inlcuding parameter
+     * annotations
+     */
+    private void initParameters() {
+        Class[] parameterTypes = method.getParameterTypes();
+        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        for(int i = 0; i < parameterAnnotations.length; i++){
+            Annotation[] annotations = parameterAnnotations[i];
             if (annotations.length == 0) {
-                NormalParam np = new NormalParam(regularParams[i]);
+                NormalParam np = new NormalParam(parameterTypes[i]);
                 listOfParams.add(np);
-
             } else {
                 for(Annotation ann : annotations){
                     Annotation myAnnotation =  (Annotation) ann;
-
                     if(ann instanceof PathVariable){
-                        listOfParams.add(addParamPathVariable(myAnnotation, regularParams[countParams]));
+                        listOfParams.add(addParamPathVariable(myAnnotation, parameterTypes[i]));
                     }
                     else if(ann instanceof RequestHeader){
-                        listOfParams.add(addParamRequestHeader(myAnnotation,regularParams[countParams]));
+                        listOfParams.add(addParamRequestHeader(myAnnotation, parameterTypes[i]));
                     }
                     else if(ann instanceof RequestBody){
-                        listOfParams.add(addParamRequestBody(myAnnotation, regularParams[countParams]));
+                        listOfParams.add(addParamRequestBody(myAnnotation, parameterTypes[i]));
                     }
                     else if(ann instanceof RequestParam){
-                        listOfParams.add(addParamRequestParam(myAnnotation, regularParams[countParams]));
+                        listOfParams.add(addParamRequestParam(myAnnotation, parameterTypes[i]));
                     }
                 }
             }
-            countParams++;
         }
     }
+
+    /**
+     * Convert Method to an XML Element
+     * @return
+     */
+    public Element toXML(){
+        Element method = DocumentHelper.createElement("method");
+        Element name = method.addElement("name");
+        name.addText(this.method.getName());
+        Element mapping = method.addElement("mapping");
+        mapping.addText(pathMash(this.parentURL, this.getPath()));
+        Element action = method.addElement("action");
+        action.addText(this.requestMethod);
+        if(!this.listOfParams.isEmpty()) {
+            Element parameter = method.addElement("parameters");
+            for(AnnotatedParam ap: listOfParams){
+                parameter.add(ap.toXML());
+            }
+        }
+        Element returnType = method.addElement("returntype");
+        returnType.addText(this.method.getReturnType().getName());
+        return method;
+    }
+
+    /**
+     * Convert to XML Element with an additional prefix on the URL path
+     * @param root
+     * @return
+     */
+    public Element toXML(String root) {
+        this.parentURL = pathMash(root, parentURL);
+        return toXML();
+    }
+
+    //==========================================================================
+    //===========================PARAM CASTING==================================
+    //==========================================================================
 
     public PathVariableParameter addParamPathVariable(Annotation ann, Class param){
         PathVariable pv =  (PathVariable) ann;
@@ -118,6 +152,10 @@ public class AnnotatedMethod {
         return reqParam;
     }
 
+    //==========================================================================
+    //===========================GETTERS========================================
+    //==========================================================================
+
     public ArrayList<AnnotatedParam> getAllParams(){
         return this.listOfParams;
     }
@@ -130,43 +168,16 @@ public class AnnotatedMethod {
         return this.requestMethod;
     }
 
+    //==========================================================================          s
+    //============================STATIC========================================
+    //==========================================================================
+
     /**
-     * Clean all of the URL parameters out of the path
+     * Static helper to combine paths
+     * @param first
+     * @param second
      * @return
      */
-    public String getCleanPath() {
-        return this.path.replaceAll(paramPattern, "");
-    }
-
-    public Element toXML(){
-        Element method = DocumentHelper.createElement("method");
-        Element name = method.addElement("name");
-        name.addText(this.method.getName());
-            //Maybe check for empty?
-            Element mapping = method.addElement("mapping");
-            mapping.addText(pathMash(this.parentURL, this.getPath()));
-            //Maybe check for empty?
-            Element action = method.addElement("action");
-            action.addText(this.requestMethod);
-        if(!this.listOfParams.isEmpty()) {
-            Element parameter = method.addElement("parameters");
-
-            for(AnnotatedParam ap: listOfParams){
-                parameter.add(ap.toXML());
-            }
-        }
-
-        Element returnType = method.addElement("returntype");
-        returnType.addText(this.method.getReturnType().getName());
-
-        return method;
-    }
-
-    public Element toXML(String root) {
-        this.parentURL = pathMash(root, parentURL);
-        return toXML();
-    }
-
     public static String pathMash(String first, String second) {
         if (first.endsWith("/") && second.startsWith("/")) {
             return first + second.substring(1);

@@ -25,6 +25,22 @@ public class RequestBodyParameter implements AnnotatedParam {
 
     }
 
+    public Element toXML() {
+        Element param = DocumentHelper.createElement("parameter");
+        Element name = param.addElement("name");
+        name.addText(this.getType());
+        Element mapped = param.addElement("mapped");
+        mapped.addText("True");
+        Element mappingInfo = param.addElement("mappinginfo");
+        Element mappingType = mappingInfo.addElement("mappingtype");
+        mappingType.addText("Parameter should be bound to the web request body " + "[" + this.getAnnotationName() + "]");
+        return param;
+    }
+
+    //==========================================================================
+    //===========================GETTERS========================================
+    //==========================================================================
+
     public String getValue() {
         return null;
     }
@@ -39,24 +55,6 @@ public class RequestBodyParameter implements AnnotatedParam {
 
     public String getAnnotationName(){
         return this.paramName;
-    }
-
-    public String printParam() {
-        String result="";
-        result = "Annotation type: " + this.paramName + ", parameter type: " + this.paramType.getName();
-        return result;
-    }
-
-    public Element toXML() {
-        Element param = DocumentHelper.createElement("parameter");
-        Element name = param.addElement("name");
-        name.addText(this.getType());
-        Element mapped = param.addElement("mapped");
-        mapped.addText("True");
-        Element mappingInfo = param.addElement("mappinginfo");
-        Element mappingType = mappingInfo.addElement("mappingtype");
-        mappingType.addText("Parameter should be bound to the web request body " + "[" + this.getAnnotationName() + "]");
-        return param;
     }
 
 }
