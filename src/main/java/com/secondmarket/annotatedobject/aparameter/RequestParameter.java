@@ -1,6 +1,7 @@
 package com.secondmarket.annotatedobject.aparameter;
 
 import com.secondmarket.annotatedobject.aparameter.AnnotatedParam;
+import com.secondmarket.jsongen.JSONGenerator;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,6 +20,7 @@ public class RequestParameter implements AnnotatedParam {
     private Class paramType;
 
     public RequestParameter (RequestParam rp, Class param){
+        JSONGenerator.addClass(param);
         this.requestParam = rp;
         this.paramName = "RequestParam";
         this.paramType = param;

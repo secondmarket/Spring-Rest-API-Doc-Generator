@@ -1,6 +1,7 @@
 package com.secondmarket.annotatedobject.aparameter;
 
 import com.secondmarket.annotatedobject.aparameter.AnnotatedParam;
+import com.secondmarket.jsongen.JSONGenerator;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +20,7 @@ public class PathVariableParameter implements AnnotatedParam {
     private Class paramType;
 
     public PathVariableParameter(PathVariable pathVariable, Class param) {
+        JSONGenerator.addClass(param);
         this.param = pathVariable;
         this.paramName = "PathVariable";
         this.paramType = param;

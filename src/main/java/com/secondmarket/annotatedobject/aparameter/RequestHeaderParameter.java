@@ -1,6 +1,7 @@
 package com.secondmarket.annotatedobject.aparameter;
 
 import com.secondmarket.annotatedobject.aparameter.AnnotatedParam;
+import com.secondmarket.jsongen.JSONGenerator;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -20,6 +21,7 @@ public class RequestHeaderParameter implements AnnotatedParam {
     private Class paramType;
 
     public RequestHeaderParameter( RequestHeader rh ,Class param){
+        JSONGenerator.addClass(param);
         this.param = rh;
         this.paramName = "RequestHeader";
         this.paramType = param;
