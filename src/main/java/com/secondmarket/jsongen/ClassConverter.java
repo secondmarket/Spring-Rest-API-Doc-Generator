@@ -35,22 +35,25 @@ public class ClassConverter {
 
     public void searchForClasses(Class clazzLocation, Field[] lof){
         JSONObject jObj = new JSONObject();
+        if (classes.contains(clazzLocation)) {
+            return;
+        } else {
+            classes.add(clazzLocation);
+        }
         for(Field f: lof){
             Class parameterizedType = getParameterizedType(f);
             String fieldName = f.getName();
             Type fieldGenericType = f.getGenericType();
             Class<?> fieldType = f.getType();
-
+            Field[] subFields = new Field[] {};
             if((parameterizedType != null) && !parameterizedType.getName().startsWith("java")){
-                classes.add(parameterizedType);
-                Field[] SMInGenericClass = getAllFields(parameterizedType);
+                subFields = getAllFields(parameterizedType);
                 addGenericField(jObj, fieldName, fieldGenericType.toString(), parameterizedType.getName().toString());
                 generateJSON(parameterizedType);
             } else if(!fieldType.isPrimitive() && !fieldType.getName().startsWith("java")){
-                classes.add(fieldType);
-                Field[] SMClasses = getAllFields(fieldType);
+                subFields = getAllFields(fieldType);
                 addGenericField(jObj, fieldName, fieldType.getName().toString(), fieldType.getName().toString());
-                //generateJSON(fieldType);
+                generateJSON(fieldType);
             } else{
                 addField(jObj, fieldName, fieldGenericType.toString());
             }
