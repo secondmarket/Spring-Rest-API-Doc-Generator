@@ -2,6 +2,7 @@ package com.secondmarket.jsongen;
 
 import com.secondmarket.annotatedobject.amethod.AnnotatedMethod;
 import org.json.simple.JSONObject;
+import org.springframework.http.HttpHeaders;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -9,9 +10,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -24,70 +23,63 @@ import java.util.List;
 public class ClassConverter {
 
     //Fields
-    private Field[] listOfFields;
-    private static ArrayList<Class> listOfClasses = new ArrayList<Class>();
+    private Field[] fields;
+    private static Set<Class> classes = new HashSet<Class>();
     private String location;
 
     public ClassConverter(Class clazz, String location){
-        //System.out.println("Constructor gets: " + clazz.getName());
-        System.out.println();
-        this.listOfFields = getAllFields(clazz);
+        this.fields = getAllFields(clazz);
         this.location = location;
-        searchForSMClasses(clazz,this.listOfFields);
+        searchForClasses(clazz, this.fields);
     }
 
-    public void searchForSMClasses(Class clazzLocation, Field[] lof){
-        //System.out.println("NOW LOOKING AT:"  + clazz.getName());
+    public void searchForClasses(Class clazzLocation, Field[] lof){
         JSONObject jObj = new JSONObject();
         for(Field f: lof){
+            Class parameterizedType = getParameterizedType(f);
+            String fieldName = f.getName();
+            Type fieldGenericType = f.getGenericType();
+            Class<?> fieldType = f.getType();
 
-            //Get generic type.
-            Class genericType = getFieldGenericType(f);
-
-            //If SM object as a generic type.
-            if(!genericType.getCanonicalName().endsWith("Boolean") && !genericType.getName().startsWith("java")){
-                listOfClasses.add(genericType);
-                Field[] SMInGenericClass = getAllFields(genericType);
-                JSONObject jsonGeneric = new JSONObject();
-                jsonGeneric.put("name", f.getGenericType().toString());
-                jsonGeneric.put("replace", genericType.getName());
-                jObj.put(f.getName(),jsonGeneric);
-                generateJSON(genericType);
-            }
-
-            //If regular SM object.
-            else if(!f.getType().isPrimitive()
-                    && !(f.getType().getName().startsWith("java."))
-                    && !listOfClasses.contains(f.getType())){
-
-                listOfClasses.add(f.getType());
-                Class clazz = f.getType();
-                Field[] SMClasses = getAllFields(f.getType());
-                JSONObject jsonObj = new JSONObject();
-
-                jsonObj.put("name", f.getGenericType().toString());
-                jsonObj.put("replace", f.getGenericType().toString());
-                jObj.put(f.getName(), jsonObj);
-                generateJSON(f.getType());
-            }
-            //Else
-            else{
-                jObj.put(f.getName(), f.getGenericType().toString());
+            if((parameterizedType != null) && !parameterizedType.getName().startsWith("java")){
+                classes.add(parameterizedType);
+                Field[] SMInGenericClass = getAllFields(parameterizedType);
+                addGenericField(jObj, fieldName, fieldGenericType.toString(), parameterizedType.getName().toString());
+                generateJSON(parameterizedType);
+            } else if(!fieldType.isPrimitive() && !fieldType.getName().startsWith("java")){
+                classes.add(fieldType);
+                Field[] SMClasses = getAllFields(fieldType);
+                addGenericField(jObj, fieldName, fieldType.getName().toString(), fieldType.getName().toString());
+                //generateJSON(fieldType);
+            } else{
+                addField(jObj, fieldName, fieldGenericType.toString());
             }
         }
+        String jsonFileLocation = AnnotatedMethod.pathMash(this.location,clazzLocation.getName() + ".json");
+        writeToFile(jObj, jsonFileLocation);
+    }
 
-        String JSONClass = AnnotatedMethod.pathMash(this.location,clazzLocation.getName() + ".json");
-        File f = new File(JSONClass);
+    public void addField(JSONObject jObj, String fieldName, String type) {
+        jObj.put(fieldName, type);
+    }
+
+    public void addGenericField(JSONObject jObj, String fieldName, String name, String replace) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("name", name);
+        jsonObject.put("replace", replace);
+        jObj.put(fieldName, jsonObject);
+    }
+
+    public void writeToFile(JSONObject jsonObject, String location) {
+        File f = new File(location);
         if (!f.exists()) {
             f.getParentFile().mkdirs();
         } else {
             f.delete();
         }
-
-        //write the JSONObject to a file.
         try {
-            FileWriter file = new FileWriter(JSONClass);
-            file.write(jObj.toJSONString());
+            FileWriter file = new FileWriter(location);
+            file.write(jsonObject.toJSONString());
             file.flush();
             file.close();
 
@@ -106,24 +98,49 @@ public class ClassConverter {
         return fields.toArray(new Field[] {});
     }
 
-    //Returns generic type of any field
-    public Class getFieldGenericType(Field field) {
+    public static Class getParameterizedType(Field field) {
         try {
             if (ParameterizedType.class.isAssignableFrom(field.getGenericType().getClass())) {
                 ParameterizedType genericType = (ParameterizedType) field.getGenericType();
                 return ((Class) (genericType.getActualTypeArguments()[0]));
             } else {
-                //Returns dummy Boolean Class to compare with ValueObject & FormBean
-                return new Boolean(false).getClass();
+                return (null);
             }
         } catch (ClassCastException e) {
             System.err.println("Error with class casting " + field.getName());
-            return new Boolean(false).getClass();
+            return (null);
         }
     }
 
-    public void generateJSON(Class clazz){
+    public void generateJSON(Class clazz) {
         Field[] SMClasses = getAllFields(clazz);
-        searchForSMClasses(clazz,SMClasses);
+        searchForClasses(clazz, SMClasses);
+    }
+
+    public static void main(String[] args) {
+        class Nonsense {
+            ArrayList<String> stringArrayList = new ArrayList<String>();
+        }
+        Field[] fields0 = (Nonsense.class).getDeclaredFields();
+        Field f0 = fields0[0];
+        String typeString0 = f0.getType().toString();
+        String genTypeString0 = f0.getGenericType().toString();
+        String fieldGenericTypeString0 = ClassConverter.getParameterizedType(f0).toString();
+        System.out.println(typeString0);
+        System.out.println(genTypeString0);
+        System.out.println(fieldGenericTypeString0);
+        System.out.println();
+        class Nonsense1 {
+            HttpHeaders httpHeaders = new HttpHeaders();
+        }
+        Field[] fields = (Nonsense1.class).getDeclaredFields();
+        Field f1 = fields[0];
+        String typeString1 = f1.getType().getName().toString();
+        String genTypeString1 = f1.getGenericType().toString();
+        //String fieldGenericTypeString1 = ClassConverter.getParameterizedType(f1).toString();
+        System.out.println(typeString1);
+        System.out.println(genTypeString1);
+        System.out.println(ClassConverter.getParameterizedType(f0).getName().toString());
+        //System.out.println(fieldGenericTypeString1);
     }
 }
