@@ -68,23 +68,25 @@ public class AnnotatedMethod {
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         for(int i = 0; i < parameterAnnotations.length; i++){
             Annotation[] annotations = parameterAnnotations[i];
+            Class parameterClass = parameterTypes[i];
+            JSONGenerator.addClass(parameterClass);
             if (annotations.length == 0) {
-                NormalParam np = new NormalParam(parameterTypes[i]);
+                NormalParam np = new NormalParam(parameterClass);
                 listOfParams.add(np);
             } else {
                 for(Annotation ann : annotations){
                     Annotation myAnnotation =  (Annotation) ann;
                     if(ann instanceof PathVariable){
-                        listOfParams.add(addParamPathVariable(myAnnotation, parameterTypes[i]));
+                        listOfParams.add(addParamPathVariable(myAnnotation, parameterClass));
                     }
                     else if(ann instanceof RequestHeader){
-                        listOfParams.add(addParamRequestHeader(myAnnotation, parameterTypes[i]));
+                        listOfParams.add(addParamRequestHeader(myAnnotation, parameterClass));
                     }
                     else if(ann instanceof RequestBody){
-                        listOfParams.add(addParamRequestBody(myAnnotation, parameterTypes[i]));
+                        listOfParams.add(addParamRequestBody(myAnnotation, parameterClass));
                     }
                     else if(ann instanceof RequestParam){
-                        listOfParams.add(addParamRequestParam(myAnnotation, parameterTypes[i]));
+                        listOfParams.add(addParamRequestParam(myAnnotation, parameterClass));
                     }
                 }
             }

@@ -20,7 +20,6 @@ public class RequestParameter implements AnnotatedParam {
     private Class paramType;
 
     public RequestParameter (RequestParam rp, Class param){
-        JSONGenerator.addClass(param);
         this.requestParam = rp;
         this.paramName = "RequestParam";
         this.paramType = param;

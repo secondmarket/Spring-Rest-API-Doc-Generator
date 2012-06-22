@@ -21,7 +21,6 @@ public class RequestHeaderParameter implements AnnotatedParam {
     private Class paramType;
 
     public RequestHeaderParameter( RequestHeader rh ,Class param){
-        JSONGenerator.addClass(param);
         this.param = rh;
         this.paramName = "RequestHeader";
         this.paramType = param;

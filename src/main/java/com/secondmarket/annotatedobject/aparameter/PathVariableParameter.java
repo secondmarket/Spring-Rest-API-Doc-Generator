@@ -20,7 +20,6 @@ public class PathVariableParameter implements AnnotatedParam {
     private Class paramType;
 
     public PathVariableParameter(PathVariable pathVariable, Class param) {
-        JSONGenerator.addClass(param);
         this.param = pathVariable;
         this.paramName = "PathVariable";
         this.paramType = param;

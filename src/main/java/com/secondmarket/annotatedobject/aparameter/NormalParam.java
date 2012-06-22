@@ -17,7 +17,6 @@ public class NormalParam implements AnnotatedParam {
     private Class param;
 
     public NormalParam(Class param){
-        JSONGenerator.addClass(param);
         this.param = param;
         this.paramName = param.getName();
     }

@@ -20,7 +20,6 @@ public class RequestBodyParameter implements AnnotatedParam {
     private Class paramType;
 
     public RequestBodyParameter( RequestBody rb, Class param){
-        JSONGenerator.addClass(param);
         this.param = rb;
         this.paramName = "RequestBody";
         this.paramType = param;
