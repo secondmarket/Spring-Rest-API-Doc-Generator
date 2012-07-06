@@ -2,8 +2,6 @@ package com.secondmarket.jsongen;
 
 import com.secondmarket.annotatedobject.amethod.AnnotatedMethod;
 import org.json.simple.JSONObject;
-import org.springframework.http.HttpHeaders;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -25,54 +23,56 @@ public class ClassConverter {
     private Field[] fields;
     private static Set<Class> classes = new HashSet<Class>();
     private String location;
+    private Class clazz;
 
     public ClassConverter(Class clazz, String location){
+        this.clazz = clazz;
         this.fields = getAllFields(clazz);
         this.location = location;
-        searchForClasses(clazz, this.fields);
     }
 
-    public void searchForClasses(Class clazzLocation, Field[] lof){
+    public void start() {
+        this.searchForClasses(clazz, fields);
+    }
+
+    private void searchForClasses(Class clazz, Field[] lof){
         JSONObject jObj = new JSONObject();
-        if (classes.contains(clazzLocation)) {
+        if (classes.contains(clazz)) {
             return;
         } else {
-            classes.add(clazzLocation);
+            classes.add(clazz);
         }
         for(Field f: lof){
             Class parameterizedType = getParameterizedType(f);
             String fieldName = f.getName();
             Type fieldGenericType = f.getGenericType();
             Class<?> fieldType = f.getType();
-            Field[] subFields = new Field[] {};
             if((parameterizedType != null) && !parameterizedType.getName().startsWith("java")){
-                subFields = getAllFields(parameterizedType);
                 addGenericField(jObj, fieldName, fieldGenericType.toString(), parameterizedType.getName().toString());
                 generateJSON(parameterizedType);
             } else if(!fieldType.isPrimitive() && !fieldType.getName().startsWith("java")){
-                subFields = getAllFields(fieldType);
                 addGenericField(jObj, fieldName, fieldType.getName().toString(), fieldType.getName().toString());
                 generateJSON(fieldType);
             } else{
                 addField(jObj, fieldName, fieldGenericType.toString());
             }
         }
-        String jsonFileLocation = AnnotatedMethod.pathMash(this.location,clazzLocation.getName() + ".json");
+        String jsonFileLocation = AnnotatedMethod.pathMash(this.location,clazz.getName() + ".json");
         writeToFile(jObj, jsonFileLocation);
     }
 
-    public void addField(JSONObject jObj, String fieldName, String type) {
+    private void addField(JSONObject jObj, String fieldName, String type) {
         jObj.put(fieldName, type);
     }
 
-    public void addGenericField(JSONObject jObj, String fieldName, String name, String replace) {
+    private void addGenericField(JSONObject jObj, String fieldName, String name, String replace) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("name", name);
         jsonObject.put("replace", replace);
         jObj.put(fieldName, jsonObject);
     }
 
-    public void writeToFile(JSONObject jsonObject, String location) {
+    private void writeToFile(JSONObject jsonObject, String location) {
         File f = new File(location);
         if (!f.exists()) {
             f.getParentFile().mkdirs();
@@ -90,12 +90,12 @@ public class ClassConverter {
         }
     }
 
-    public Field[] getAllFields(Class klass) {
+    private Field[] getAllFields(Class clazz) {
         List<Field> fields = new ArrayList<Field>();
-        fields.addAll(Arrays.asList(klass.getDeclaredFields()));
+        fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
 
-        if (klass.getSuperclass() != null) {
-            fields.addAll(Arrays.asList(getAllFields(klass.getSuperclass())));
+        if (clazz.getSuperclass() != null) {
+            fields.addAll(Arrays.asList(getAllFields(clazz.getSuperclass())));
         }
         return fields.toArray(new Field[] {});
     }
@@ -114,8 +114,8 @@ public class ClassConverter {
         }
     }
 
-    public void generateJSON(Class clazz) {
-        Field[] SMClasses = getAllFields(clazz);
-        searchForClasses(clazz, SMClasses);
+    private void generateJSON(Class clazz) {
+        Field[] classFields = getAllFields(clazz);
+        searchForClasses(clazz, classFields);
     }
 }

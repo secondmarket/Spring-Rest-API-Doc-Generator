@@ -27,7 +27,6 @@ public class RequestHeaderParameter implements AnnotatedParam {
     }
 
     public Element toXML() {
-
         Element param = DocumentHelper.createElement("parameter");
         Element name = param.addElement("name");
         name.addText(this.getType());

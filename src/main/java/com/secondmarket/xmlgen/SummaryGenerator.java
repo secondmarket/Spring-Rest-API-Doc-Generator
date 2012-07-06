@@ -19,16 +19,16 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class SummaryGenerator {
-    private Document d;
+    private Document document;
     private Element root;
     private File mainFolder;
-    private DocumentFactory df;
+    private DocumentFactory documentFactory;
 
     public SummaryGenerator(String location) {
-        df = DocumentFactory.getInstance();
-        d = df.createDocument();
-        root = df.createElement("folders");
-        d.setRootElement(root);
+        documentFactory = DocumentFactory.getInstance();
+        document = documentFactory.createDocument();
+        root = documentFactory.createElement("folders");
+        document.setRootElement(root);
         root.addAttribute("rootPath", "http://secondmarket.com/");
 
         mainFolder = new File(location);
@@ -36,7 +36,7 @@ public class SummaryGenerator {
     }
 
     private void traverseFolder(File folder, Element parent, String path) {
-        Element folderElement = df.createElement("folder");
+        Element folderElement = documentFactory.createElement("folder");
         folderElement.addAttribute("name", folder.getName());
         File[] children = folder.listFiles();
         String totalPath = AnnotatedMethod.pathMash(path,folder.getName());
@@ -54,8 +54,7 @@ public class SummaryGenerator {
 
     private void traverseFile(File file, Element parent, String path) {
         if (file.getName().endsWith("xml")) {
-            //File element
-            Element fileElement = df.createElement("file");
+            Element fileElement = documentFactory.createElement("file");
             fileElement.addText(file.getName());
             String totalPath = AnnotatedMethod.pathMash(path, file.getName());
             fileElement.addAttribute("path", totalPath);
@@ -72,8 +71,7 @@ public class SummaryGenerator {
         FileOutputStream fos = new FileOutputStream(summary);
         OutputFormat format = OutputFormat.createPrettyPrint();
         XMLWriter writer = new XMLWriter(fos, format);
-        Element root = d.getRootElement();
-        writer.write(d);
+        writer.write(document);
         writer.flush();
         fos.close();
     }

@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam;
  * To change this template use File | Settings | File Templates.
  */
 public class RequestParameter implements AnnotatedParam {
-    //Fields
     private RequestParam requestParam;
     private String paramName;
     private Class paramType;
@@ -48,7 +47,6 @@ public class RequestParameter implements AnnotatedParam {
         }
         if(!this.getRequestParam().defaultValue().isEmpty()) {
             Element defaultValue = mappingInfo.addElement("defaultvalue");
-            //System.out.println("Default value is: " + this.getRequestParam().defaultValue());
             defaultValue.addText(this.getRequestParam().defaultValue());
         }
         return param;

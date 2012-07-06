@@ -10,6 +10,7 @@ public class JSONGenerator {
     public static void generateJSON(String location){
         for (Class c : returnTypeClasses) {
             ClassConverter cc = new ClassConverter(c, location);
+            cc.start();
         }
     }
 

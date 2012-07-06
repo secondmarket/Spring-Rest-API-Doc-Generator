@@ -95,7 +95,7 @@ public class AnnotatedMethod {
 
     /**
      * Convert Method to an XML Element
-     * @return
+     * @return the XML DOM Element containing the Method information
      */
     public Element toXML(){
         Element method = DocumentHelper.createElement("method");
@@ -118,7 +118,7 @@ public class AnnotatedMethod {
 
     /**
      * Convert to XML Element with an additional prefix on the URL path
-     * @param root
+     * @param root the root URL specified in the plugin configuration
      * @return
      */
     public Element toXML(String root) {
@@ -176,9 +176,9 @@ public class AnnotatedMethod {
 
     /**
      * Static helper to combine paths
-     * @param first
-     * @param second
-     * @return
+     * @param first the first half of the path
+     * @param second the second half of the path
+     * @return the intelligently combined file path
      */
     public static String pathMash(String first, String second) {
         if (first.endsWith("/") && second.startsWith("/")) {

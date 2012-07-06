@@ -104,7 +104,7 @@ public class MainMojo extends AbstractMojo {
     }
 
     /**
-     * Magic
+     * Magic method to access the classpath of the containing project.
      * @throws DependencyResolutionRequiredException
      * @throws DuplicateRealmException
      * @throws MalformedURLException
