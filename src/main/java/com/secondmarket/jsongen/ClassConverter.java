@@ -22,7 +22,6 @@ import java.util.*;
  */
 public class ClassConverter {
 
-    //Fields
     private Field[] fields;
     private static Set<Class> classes = new HashSet<Class>();
     private String location;
@@ -118,32 +117,5 @@ public class ClassConverter {
     public void generateJSON(Class clazz) {
         Field[] SMClasses = getAllFields(clazz);
         searchForClasses(clazz, SMClasses);
-    }
-
-    public static void main(String[] args) {
-        class Nonsense {
-            ArrayList<String> stringArrayList = new ArrayList<String>();
-        }
-        Field[] fields0 = (Nonsense.class).getDeclaredFields();
-        Field f0 = fields0[0];
-        String typeString0 = f0.getType().toString();
-        String genTypeString0 = f0.getGenericType().toString();
-        String fieldGenericTypeString0 = ClassConverter.getParameterizedType(f0).toString();
-        System.out.println(typeString0);
-        System.out.println(genTypeString0);
-        System.out.println(fieldGenericTypeString0);
-        System.out.println();
-        class Nonsense1 {
-            HttpHeaders httpHeaders = new HttpHeaders();
-        }
-        Field[] fields = (Nonsense1.class).getDeclaredFields();
-        Field f1 = fields[0];
-        String typeString1 = f1.getType().getName().toString();
-        String genTypeString1 = f1.getGenericType().toString();
-        //String fieldGenericTypeString1 = ClassConverter.getParameterizedType(f1).toString();
-        System.out.println(typeString1);
-        System.out.println(genTypeString1);
-        System.out.println(ClassConverter.getParameterizedType(f0).getName().toString());
-        //System.out.println(fieldGenericTypeString1);
     }
 }

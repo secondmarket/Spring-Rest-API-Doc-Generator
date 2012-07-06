@@ -23,16 +23,13 @@ public class AnnotatedClass {
     private ArrayList<AnnotatedMethod> listOfMethods = new ArrayList<AnnotatedMethod>();
     private String className;
     private Class clazz;
-    private Annotation[] classAnnotations;
     private String path="";
     private String methodName="";
     private String action="";
 
-
     public AnnotatedClass(Class clazz){
         this.clazz = clazz;
         this.className = clazz.getName();
-        this.classAnnotations =  clazz.getAnnotations();
         this.initialize();
         Method[] methods = clazz.getMethods();
         for(Method method: methods){
@@ -42,24 +39,31 @@ public class AnnotatedClass {
         }
     }
 
-
-
-    public void initialize(){
-        for(Annotation ca: classAnnotations){
-            if(ca.annotationType().getCanonicalName().contains("RequestMapping")){
-                RequestMapping rm = (RequestMapping) ca;
-                RequestMethod[] reqMethod = rm.method();
-                for(RequestMethod rMet: reqMethod){
-                    this.methodName = rMet.name();
-                }
-                String[] classValue = rm.value();
-                if (classValue.length > 0) {
-                    this.path = classValue[0];
-                }
+    /**
+     * Check for an @RequestMapping annotation on the class and, if present, store
+     * the RequestMethod and the URL mapping
+     */
+    public void initialize() {
+        Annotation ann = clazz.getAnnotation(RequestMapping.class);
+        if (ann != null && (ann instanceof RequestMapping)) {
+            RequestMapping rm = (RequestMapping) ann;
+            RequestMethod[] reqMethod = rm.method();
+            if (reqMethod.length > 0) {
+                this.methodName = reqMethod[0].name();
+            }
+            String[] classValue = rm.value();
+            if (classValue.length > 0) {
+                this.path = classValue[0];
             }
         }
     }
 
+    /**
+     * Create an XML representation of the Annotated Class, passing a Document to which the
+     * XML should be added.
+     * @param doc generally an emtpy Document
+     * @return
+     */
     public Element toXML(Document doc){
         Element root = doc.addElement("annotatedclass");
         Element clazz = root.addElement("name");
@@ -81,9 +85,16 @@ public class AnnotatedClass {
         return root;
     }
 
+    /**
+     * Iterate through all AnnotatedMethods belonging to this class and store each one in a
+     * properly organized XML file mirroring the REST api in the directory passed to the application.
+     * @param rootURL the relative root URL for set of Controllers to which this class belongs
+     *                ex: /home/users NOT http://foo.com/bar/
+     * @param location the location in which to save the XML files belonging to the methods of this class
+     * @throws IOException
+     */
     public void saveToXML(String rootURL, String location) throws IOException {
         String path = this.getPath();
-        //Delete existing
         File dir = new File(location);
         if (dir.exists()) {
             dir.delete();
@@ -92,7 +103,6 @@ public class AnnotatedClass {
         String pathWithRoot = AnnotatedMethod.pathMash(rootURL, path);
         path = AnnotatedMethod.pathMash(location, pathWithRoot);
         for (AnnotatedMethod am : listOfMethods) {
-            //Right now, not using cleaned path
             String methodPath = am.getPath();
             String requestMethod = am.getRequestMethod();
             //add the root to the method before making XML
@@ -103,20 +113,31 @@ public class AnnotatedClass {
             String folderPath = AnnotatedMethod.pathMash(path, methodPath);
             String totalPath = AnnotatedMethod.pathMash(folderPath, requestMethod + ".xml");
             //Make directory structure
-            File f = new File(totalPath);
-            if (!f.exists()) {
-                f.getParentFile().mkdirs();
-                f.createNewFile();
-            } else {
-                f.delete();
-            }
-            FileOutputStream fos = new FileOutputStream(totalPath);
-            OutputFormat format = OutputFormat.createPrettyPrint();
-            XMLWriter writer = new XMLWriter(fos, format);
-            writer.write(methodDoc);
-            writer.flush();
-            fos.close();
+            writeFile(totalPath, methodDoc);
         }
+    }
+
+    /**
+     * Write an XML document to a path, creating the appropriate folder structure
+     * if necessary
+     * @param path the local path to the file
+     * @param document the Document object to be written to disk
+     * @throws IOException
+     */
+    private void writeFile(String path, Document document) throws IOException {
+        File f = new File(path);
+        if (!f.exists()) {
+            f.getParentFile().mkdirs();
+            f.createNewFile();
+        } else {
+            f.delete();
+        }
+        FileOutputStream fos = new FileOutputStream(path);
+        OutputFormat format = OutputFormat.createPrettyPrint();
+        XMLWriter writer = new XMLWriter(fos, format);
+        writer.write(document);
+        writer.flush();
+        fos.close();
     }
 
 
