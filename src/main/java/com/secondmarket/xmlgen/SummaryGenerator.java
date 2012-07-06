@@ -35,6 +35,12 @@ public class SummaryGenerator {
         traverseFolder(mainFolder, root, "");
     }
 
+    /**
+     * Recursively traverse a folder in the filesystem for XML>
+     * @param folder
+     * @param parent
+     * @param path
+     */
     private void traverseFolder(File folder, Element parent, String path) {
         Element folderElement = documentFactory.createElement("folder");
         folderElement.addAttribute("name", folder.getName());
@@ -52,6 +58,12 @@ public class SummaryGenerator {
         parent.add(folderElement);
     }
 
+    /**
+     * Add a file to the XML summary
+     * @param file
+     * @param parent
+     * @param path
+     */
     private void traverseFile(File file, Element parent, String path) {
         if (file.getName().endsWith("xml")) {
             Element fileElement = documentFactory.createElement("file");
@@ -62,6 +74,11 @@ public class SummaryGenerator {
         }
     }
 
+    /**
+     * Write the summary document to disk
+     * @param location
+     * @throws IOException
+     */
     public void writeDocument(String location) throws IOException {
         File summary = new File(mainFolder + File.separator + location);
         if (summary.exists()) {

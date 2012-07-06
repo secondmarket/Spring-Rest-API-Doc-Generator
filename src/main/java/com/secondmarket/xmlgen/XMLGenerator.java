@@ -16,6 +16,12 @@ import java.util.Set;
  */
 public class XMLGenerator {
 
+    /**
+     * Fully annotate all classes in the set of controllers and save the XML to a destination.
+     * @param controllers
+     * @param rootURL
+     * @param destination
+     */
     public static void generateXML(Set<Class<?>> controllers, String rootURL, String destination) {
         try {
             for (Class c : controllers) {

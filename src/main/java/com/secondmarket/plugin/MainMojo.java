@@ -81,6 +81,9 @@ public class MainMojo extends AbstractMojo {
         writeJSON();
     }
 
+    /**
+     * Generate a hierarchy of XML files representing the REST API
+     */
     private void writeXML() {
         Reflections reflections = new Reflections(packageName.toString());
         Set<Class<?>> controllers = reflections.getTypesAnnotatedWith(Controller.class);
@@ -88,6 +91,9 @@ public class MainMojo extends AbstractMojo {
         XMLGenerator.generateXML(controllers, rootURL.toString(), XMLPath);
     }
 
+    /**
+     * Generate an XML summary file of all XML files generated,
+     */
     private void writeSummary() {
         String XMLPath = AnnotatedMethod.pathMash(docDestination.toString(), "/xml");
         SummaryGenerator sg = new SummaryGenerator(XMLPath);
@@ -98,6 +104,9 @@ public class MainMojo extends AbstractMojo {
         }
     }
 
+    /**
+     * Generate a JSON description of all non standard classes in the project.
+     */
     private void writeJSON() {
         String JSONPath = AnnotatedMethod.pathMash(docDestination.toString(), "/json");
         JSONGenerator.generateJSON(JSONPath);
