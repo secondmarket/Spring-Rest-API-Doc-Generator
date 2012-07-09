@@ -31,11 +31,15 @@ public class AnnotatedClass {
         this.clazz = clazz;
         this.className = clazz.getName();
         this.initialize();
-        Method[] methods = clazz.getMethods();
-        for(Method method: methods){
-            if(method.isAnnotationPresent(RequestMapping.class)){
-                this.listOfMethods.add(new AnnotatedMethod(method, this.path));
+        try {
+            Method[] methods = clazz.getMethods();
+            for(Method method : methods){
+                if(method.isAnnotationPresent(RequestMapping.class)){
+                    this.listOfMethods.add(new AnnotatedMethod(method, this.path));
+                }
             }
+        } catch (NoClassDefFoundError error) {
+            System.err.println("No Class Def Found Error: " + className);
         }
     }
 
