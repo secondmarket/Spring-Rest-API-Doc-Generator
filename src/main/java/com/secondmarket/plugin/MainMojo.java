@@ -65,20 +65,31 @@ public class MainMojo extends AbstractMojo {
      */
     private Object rootURL;
 
+    /**
+     * @parameter expression="${docs.generate}" default-value="false"
+     */
+    private Object generate;
+
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         getLog().info("Hello World, from the Plugin!");
         getLog().info("Scanning for Controllers");
         getLog().info("Package: " + packageName.toString());
         getLog().info("Resolving Parent Class Loader");
-        try {
-            getClasses();
-        } catch (Exception e) {
-            getLog().error(e);
+        Boolean shouldRun = Boolean.parseBoolean((String) generate);
+        getLog().info("The value of generate is: " + shouldRun.toString());
+        //By default, don't run
+        if (shouldRun) {
+            try {
+                getClasses();
+            } catch (Exception e) {
+                getLog().error(e);
+            }
+            writeXML();
+            writeSummary();
+            writeJSON();
         }
-        writeXML();
-        writeSummary();
-        writeJSON();
     }
 
     /**
