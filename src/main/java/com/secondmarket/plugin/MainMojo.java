@@ -86,10 +86,42 @@ public class MainMojo extends AbstractMojo {
             } catch (Exception e) {
                 getLog().error(e);
             }
+            //Clear old files
+            clearDestination();
+            //Write new ones
             writeXML();
             writeSummary();
             writeJSON();
         }
+    }
+
+    /**
+     * Delete docDestination/json and docDestination/xml recursively
+     */
+    private void clearDestination() {
+        String docDest = docDestination.toString();
+        String xmlPath = AnnotatedMethod.pathMash(docDest, "/xml/");
+        File xmlFile = new File (xmlPath);
+        String jsonPath = AnnotatedMethod.pathMash(docDest, "/json/");
+        File jsonFile = new File(jsonPath);
+        getLog().info("Deleting old XML files");
+        deleteDirectory(xmlFile);
+        getLog().info("Deleting old JSON files");
+        deleteDirectory(jsonFile);
+    }
+
+    private boolean deleteDirectory(File path) {
+        if (path.exists()) {
+            File[] files = path.listFiles();
+            for (int i = 0; i < files.length; i++) {
+                if (files[i].isDirectory()) {
+                    deleteDirectory(files[i]);
+                } else {
+                    files[i].delete();
+                }
+            }
+        }
+        return path.delete();
     }
 
     /**

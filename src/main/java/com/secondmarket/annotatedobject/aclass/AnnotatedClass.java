@@ -100,9 +100,6 @@ public class AnnotatedClass {
     public void saveToXML(String rootURL, String location) throws IOException {
         String path = this.getPath();
         File dir = new File(location);
-        if (dir.exists()) {
-            dir.delete();
-        }
         //Make it a local directory
         String pathWithRoot = AnnotatedMethod.pathMash(rootURL, path);
         path = AnnotatedMethod.pathMash(location, pathWithRoot);
