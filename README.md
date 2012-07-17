@@ -17,7 +17,7 @@ Install the plugin like any other Maven plugin, and then add the following to yo
 	        &lt;plugin&gt;
 	            &lt;groupId&gt;MavenReflectionPlugin&lt;/groupId&gt;
 	            &lt;artifactId&gt;MavenReflectionPlugin&lt;/artifactId&gt;
-	            &lt;version&gt;1.0&lt;/version&gt;
+	            &lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;
 	            &lt;executions&gt;
 	                &lt;execution&gt;
 	                    &lt;id&gt;DocExecution&lt;/id&gt;

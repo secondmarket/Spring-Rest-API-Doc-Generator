@@ -42,3 +42,5 @@ local.properties
 .settings/
 .loadpath
 
+#Specific Files
+DistributionDetails.xml
