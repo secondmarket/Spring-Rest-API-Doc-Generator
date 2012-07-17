@@ -6,10 +6,13 @@
 
     <groupId>MavenReflectionPlugin</groupId>
     <artifactId>MavenReflectionPlugin</artifactId>
-    <version>1.0</version>
+    <version>1.0-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
 
-    <!-- TODO: NEED TO ADD TO ~/.m2/settings.xml -->
+    <name>Maven Reflection Plugin</name>
+    <description>A Maven plugin to generate documentation for Spring MVC Controllers</description>
+    <url>https://github.com/secondmarket/Spring-Rest-API-Doc-Generator</url>
+
     <build>
         <plugins>
             <plugin>
@@ -74,8 +77,28 @@
             <artifactId>gson</artifactId>
             <version>1.7.1</version>
         </dependency>
-
     </dependencies>
 
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-plugin-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </reporting>
+
+    <repositories>
+        <repository>
+            <id>rstn-snapshots</id>
+            <url>http://maven.secondmarket.com/repository/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
 </project>
